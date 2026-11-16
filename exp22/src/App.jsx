@@ -3,9 +3,9 @@ import "./App.css";
 
 function App() {
   const patients = [
-    { id: 1, name: "John Doe", age: 30, gender: "male", ward: "A" },
-    { id: 2, name: "Jane Smith", age: 25, gender: "female", ward: "B" },
-    { id: 3, name: "Alice Johnson", age: 40, gender: "female", ward: "C" }
+    { id: 1, name: "Maneesha", age: 30, gender: "female", ward: "A" },
+    { id: 2, name: "Vamsi Krishna", age: 25, gender: "male", ward: "B" },
+    { id: 3, name: "Nivedita", age: 21, gender: "female", ward: "C" }
   ];
 
   return (
