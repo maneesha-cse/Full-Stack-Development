@@ -1,0 +1,42 @@
+
+### 1. CREATE - Add a movie
+POST http://localhost:8000/api/v1/movies
+Content-Type: application/json
+
+{
+  "title": "Inception",
+  "director": "Christopher Nolan",
+  "category": "Sci-Fi",
+  "year": 2010
+}
+
+###
+
+### 2. READ - Get all movies
+GET http://localhost:8000/api/v1/movies
+
+###
+
+### 3. READ - Get movie by ID
+### Replace YOUR_MOVIE_ID with actual _id from POST response
+GET http://localhost:8000/api/v1/movies/6afc18872168da8d19a726ae
+
+###
+
+### 4. UPDATE - Update movie by ID
+### Replace YOUR_MOVIE_ID with actual _id
+PUT http://localhost:8000/api/v1/movies/6afc18872168da8d19a726ae
+Content-Type: application/json
+
+{
+  "title": "Interstellar",
+  "director": "Christopher Nolan",
+  "category": "Science Fiction",
+  "year": 2014
+}
+
+###
+
+### 5. DELETE - Delete movie by ID
+### Replace YOUR_MOVIE_ID with actual _id
+DELETE http://localhost:8000/api/v1/movies/6afc18872168da8d19a726ae
