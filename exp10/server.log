@@ -1,0 +1,6 @@
+POST /api/v1/patients 201 32ms
+GET /api/v1/patients 200 10ms
+PUT /api/v1/patients/1 200 37ms
+DELETE /api/v1/patients/1 200 3ms
+GET /api/v1/patients 200 2ms
+GET /api/v1/patients 200 2ms
