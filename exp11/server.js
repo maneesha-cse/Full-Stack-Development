@@ -11,17 +11,27 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 const client = new MongoClient(process.env.MONGO_URI);
-let db;
 
-async function connectDB() {
-  await client.connect();
-  db = client.db("booksDB");
-  console.log("Connected to MongoDB");
+let dbPromise;
+
+async function getDB() {
+  if (!dbPromise) {
+    dbPromise = client.connect().then(() => {
+      console.log("Connected to MongoDB");
+      return client.db("booksDB");
+    }).catch(error => {
+      dbPromise = null;
+      throw error;
+    });
+  }
+
+  return dbPromise;
 }
 
 // POST: Add book
 app.post("/api/v1/books", async (req, res) => {
   try {
+    const db = await getDB();
     const { title, author, category, publication } = req.body;
 
     if (!title || !author || !category || !publication) {
@@ -31,10 +41,7 @@ app.post("/api/v1/books", async (req, res) => {
     }
 
     const result = await db.collection("books").insertOne({
-      title,
-      author,
-      category,
-      publication
+      title, author, category, publication
     });
 
     res.status(201).json({
@@ -49,9 +56,10 @@ app.post("/api/v1/books", async (req, res) => {
 // GET: All books
 app.get("/api/v1/books", async (req, res) => {
   try {
+    const db = await getDB();
     const books = await db.collection("books").find().toArray();
 
-    res.status(200).json({
+    res.json({
       message: "Books fetched successfully",
       data: books
     });
@@ -64,19 +72,16 @@ app.get("/api/v1/books", async (req, res) => {
 app.get("/api/v1/books/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        message: "Invalid book ID"
-      });
+      return res.status(400).json({ message: "Invalid book ID" });
     }
 
+    const db = await getDB();
     const book = await db.collection("books").findOne({
       _id: new ObjectId(req.params.id)
     });
 
     if (!book) {
-      return res.status(404).json({
-        message: "Book not found"
-      });
+      return res.status(404).json({ message: "Book not found" });
     }
 
     res.json({
@@ -92,11 +97,10 @@ app.get("/api/v1/books/:id", async (req, res) => {
 app.put("/api/v1/books/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        message: "Invalid book ID"
-      });
+      return res.status(400).json({ message: "Invalid book ID" });
     }
 
+    const db = await getDB();
     const { title, author, category, publication } = req.body;
 
     const result = await db.collection("books").updateOne(
@@ -104,15 +108,11 @@ app.put("/api/v1/books/:id", async (req, res) => {
       { $set: { title, author, category, publication } }
     );
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({
-        message: "Book not found"
-      });
+    if (!result.matchedCount) {
+      return res.status(404).json({ message: "Book not found" });
     }
 
-    res.json({
-      message: "Book updated successfully"
-    });
+    res.json({ message: "Book updated successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -122,39 +122,35 @@ app.put("/api/v1/books/:id", async (req, res) => {
 app.delete("/api/v1/books/:id", async (req, res) => {
   try {
     if (!ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({
-        message: "Invalid book ID"
-      });
+      return res.status(400).json({ message: "Invalid book ID" });
     }
 
+    const db = await getDB();
     const result = await db.collection("books").deleteOne({
       _id: new ObjectId(req.params.id)
     });
 
-    if (result.deletedCount === 0) {
-      return res.status(404).json({
-        message: "Book not found"
-      });
+    if (!result.deletedCount) {
+      return res.status(404).json({ message: "Book not found" });
     }
 
-    res.json({
-      message: "Book deleted successfully"
-    });
+    res.json({ message: "Book deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Start server
-async function startServer() {
-  await connectDB();
-
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
+// Local server
+if (require.main === module) {
+  getDB()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}`);
+      });
+    })
+    .catch(error => {
+      console.error("MongoDB connection failed:", error.message);
+    });
 }
 
-startServer().catch(error => {
-  console.error("MongoDB connection failed:", error.message);
-});
-
+module.exports = app;
