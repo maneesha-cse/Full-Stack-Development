@@ -1,11 +1,12 @@
 
 const express = require("express");
 const fs = require("fs");
+const path = require("path");
 const cors = require("cors");
 const morgan = require("morgan");
 
 const app = express();
-const PORT = 6500;
+const PORT = process.env.PORT || 6500;
 
 // Built-in middleware
 app.use(express.json());
@@ -23,7 +24,8 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const log = `${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - start}ms\n`;
-    fs.appendFile("server.log", log, (err) => {
+
+    fs.appendFile(path.join(__dirname, "server.log"), log, (err) => {
       if (err) console.error(err);
     });
   });
@@ -31,7 +33,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Patient data
+// In-memory patient data
 let patients = [];
 let nextId = 1;
 
@@ -39,7 +41,7 @@ let nextId = 1;
 const validatePatient = (req, res, next) => {
   const { name, age, blood } = req.body;
 
-  if (!name || !age || !blood || age <= 0) {
+  if (!name || !age || !blood || Number(age) <= 0) {
     return res.status(400).json({
       message: "Invalid patient data"
     });
@@ -48,12 +50,12 @@ const validatePatient = (req, res, next) => {
   next();
 };
 
-// POST - Create patient
+// Create patient
 app.post("/api/v1/patients", validatePatient, (req, res) => {
   const patient = {
     id: nextId++,
     name: req.body.name,
-    age: req.body.age,
+    age: Number(req.body.age),
     blood: req.body.blood
   };
 
@@ -65,7 +67,7 @@ app.post("/api/v1/patients", validatePatient, (req, res) => {
   });
 });
 
-// GET - Read all patients
+// Get all patients
 app.get("/api/v1/patients", (req, res) => {
   res.status(200).json({
     message: "Patients fetched successfully",
@@ -73,9 +75,11 @@ app.get("/api/v1/patients", (req, res) => {
   });
 });
 
-// GET - Read patient by ID
+// Get patient by ID
 app.get("/api/v1/patients/:id", (req, res, next) => {
-  const patient = patients.find(p => p.id === Number(req.params.id));
+  const patient = patients.find(
+    p => p.id === Number(req.params.id)
+  );
 
   if (!patient) {
     const err = new Error("Patient not found");
@@ -89,9 +93,11 @@ app.get("/api/v1/patients/:id", (req, res, next) => {
   });
 });
 
-// PUT - Update patient
+// Update patient
 app.put("/api/v1/patients/:id", validatePatient, (req, res, next) => {
-  const patient = patients.find(p => p.id === Number(req.params.id));
+  const patient = patients.find(
+    p => p.id === Number(req.params.id)
+  );
 
   if (!patient) {
     const err = new Error("Patient not found");
@@ -100,7 +106,7 @@ app.put("/api/v1/patients/:id", validatePatient, (req, res, next) => {
   }
 
   patient.name = req.body.name;
-  patient.age = req.body.age;
+  patient.age = Number(req.body.age);
   patient.blood = req.body.blood;
 
   res.status(200).json({
@@ -109,9 +115,11 @@ app.put("/api/v1/patients/:id", validatePatient, (req, res, next) => {
   });
 });
 
-// DELETE - Delete patient
+// Delete patient
 app.delete("/api/v1/patients/:id", (req, res, next) => {
-  const index = patients.findIndex(p => p.id === Number(req.params.id));
+  const index = patients.findIndex(
+    p => p.id === Number(req.params.id)
+  );
 
   if (index === -1) {
     const err = new Error("Patient not found");
@@ -143,6 +151,11 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
-});
+// Start local server
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
