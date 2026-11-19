@@ -8,11 +8,8 @@ const morgan = require("morgan");
 const app = express();
 const PORT = process.env.PORT || 6500;
 
-// Built-in middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Third-party middleware
 app.use(cors());
 app.use(morgan("dev"));
 
@@ -24,7 +21,6 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const log = `${req.method} ${req.originalUrl} ${res.statusCode} ${Date.now() - start}ms\n`;
-
     fs.appendFile(path.join(__dirname, "server.log"), log, (err) => {
       if (err) console.error(err);
     });
@@ -33,7 +29,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// In-memory patient data
 let patients = [];
 let nextId = 1;
 
@@ -50,7 +45,7 @@ const validatePatient = (req, res, next) => {
   next();
 };
 
-// Create patient
+// POST
 app.post("/api/v1/patients", validatePatient, (req, res) => {
   const patient = {
     id: nextId++,
@@ -67,7 +62,7 @@ app.post("/api/v1/patients", validatePatient, (req, res) => {
   });
 });
 
-// Get all patients
+// GET all
 app.get("/api/v1/patients", (req, res) => {
   res.status(200).json({
     message: "Patients fetched successfully",
@@ -75,7 +70,7 @@ app.get("/api/v1/patients", (req, res) => {
   });
 });
 
-// Get patient by ID
+// GET by ID
 app.get("/api/v1/patients/:id", (req, res, next) => {
   const patient = patients.find(
     p => p.id === Number(req.params.id)
@@ -87,13 +82,13 @@ app.get("/api/v1/patients/:id", (req, res, next) => {
     return next(err);
   }
 
-  res.status(200).json({
+  res.json({
     message: "Patient details fetched successfully",
     data: patient
   });
 });
 
-// Update patient
+// PUT
 app.put("/api/v1/patients/:id", validatePatient, (req, res, next) => {
   const patient = patients.find(
     p => p.id === Number(req.params.id)
@@ -109,13 +104,13 @@ app.put("/api/v1/patients/:id", validatePatient, (req, res, next) => {
   patient.age = Number(req.body.age);
   patient.blood = req.body.blood;
 
-  res.status(200).json({
+  res.json({
     message: "Patient updated successfully",
     data: patient
   });
 });
 
-// Delete patient
+// DELETE
 app.delete("/api/v1/patients/:id", (req, res, next) => {
   const index = patients.findIndex(
     p => p.id === Number(req.params.id)
@@ -129,7 +124,7 @@ app.delete("/api/v1/patients/:id", (req, res, next) => {
 
   const deletedPatient = patients.splice(index, 1)[0];
 
-  res.status(200).json({
+  res.json({
     message: "Patient deleted successfully",
     data: deletedPatient
   });
@@ -138,7 +133,6 @@ app.delete("/api/v1/patients/:id", (req, res, next) => {
 // Error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-
   res.status(err.statusCode || 500).json({
     message: err.message || "Internal Server Error"
   });
@@ -151,10 +145,9 @@ app.use((req, res) => {
   });
 });
 
-// Start local server
 if (require.main === module) {
   app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
   });
 }
 

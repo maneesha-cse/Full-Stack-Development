@@ -1,42 +1,44 @@
 
 ### 1. CREATE - Add a movie
-POST http://localhost:8000/api/v1/movies
+POST https://movie-crud-6reh4n36s-maneesha-cse.vercel.app/api/v1/movies
 Content-Type: application/json
 
 {
-  "title": "Inception",
-  "director": "Christopher Nolan",
-  "category": "Sci-Fi",
-  "year": 2010
+  "title": "Bahubali",
+  "director": "S.S. Rajamouli",
+  "category": "Action",
+  "year": 2015
 }
 
 ###
 
 ### 2. READ - Get all movies
-GET http://localhost:8000/api/v1/movies
+GET https://movie-crud-6reh4n36s-maneesha-cse.vercel.app/api/v1/movies
 
 ###
 
 ### 3. READ - Get movie by ID
-### Replace YOUR_MOVIE_ID with actual _id from POST response
-GET http://localhost:8000/api/v1/movies/6afc18872168da8d19a726ae
+### Replace MOVIE_ID with the ID returned by CREATE
+GET https://movie-crud-6reh4n36s-maneesha-cse.vercel.app/api/v1/movies/6afc36ee009cfcc4ebd87070
 
 ###
 
 ### 4. UPDATE - Update movie by ID
-### Replace YOUR_MOVIE_ID with actual _id
-PUT http://localhost:8000/api/v1/movies/6afc18872168da8d19a726ae
+### Replace MOVIE_ID with the same ID returned by CREATE
+PUT https://movie-crud-6reh4n36s-maneesha-cse.vercel.app/api/v1/movies/6afc36ee009cfcc4ebd87070
 Content-Type: application/json
 
 {
-  "title": "Interstellar",
-  "director": "Christopher Nolan",
-  "category": "Science Fiction",
-  "year": 2014
+  "title": "Baahubali 2",
+  "director": "S.S. Rajamouli",
+  "category": "Action Drama",
+  "year": 2017
 }
 
 ###
 
 ### 5. DELETE - Delete movie by ID
-### Replace YOUR_MOVIE_ID with actual _id
-DELETE http://localhost:8000/api/v1/movies/6afc18872168da8d19a726ae
+### Replace MOVIE_ID with the same ID returned by CREATE
+DELETE https://movie-crud-6reh4n36s-maneesha-cse.vercel.app/api/v1/movies/6afc3643009cfcc4ebd8706f
+
+###
